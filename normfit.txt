@@ -1,0 +1,67 @@
+import numpy as np
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+
+def norm_fit_demo(data):
+    result = {}
+
+    # Estimate mean and standard deviation
+    muhat, sigmahat = stats.norm.fit(data)
+    result['mu'] = muhat
+    result['sigma'] = sigmahat
+
+    # Calculate kurtosis
+    k = stats.kurtosis(data)
+    result['kurtosis'] = k
+
+    # Calculate skewness
+    s = stats.skew(data)
+    result['skewness'] = s
+
+    # Creating figure
+    fig, ax = plt.subplots()
+    # Plot histogram with fitted normal distribution
+    ax.hist(data, bins='auto', density=True, alpha=0.6, color='g')
+    
+    # Plot the normal distribution with the estimated parameters
+    xmin, xmax = plt.xlim()
+    x = np.linspace(xmin, xmax, 100)
+    p = stats.norm.pdf(x, muhat, sigmahat)
+    ax.plot(x, p, 'k', linewidth=2)
+
+    # Set string
+    str_list = []
+    str_list.append(f'mu = {result["mu"]}')
+    str_list.append(f'sigma = {result["sigma"]}')
+
+    # Kurtosis
+    if result['kurtosis'] > 3:
+        exc = result['kurtosis'] - 3
+        str_list.append(f'excess kurtosis = {exc} (leptokurtic)')
+    elif result['kurtosis'] < 3:
+        str_list.append(f'kurtosis = {result["kurtosis"]} (platykurtic)')
+    else:
+        str_list.append('kurtosis = 3 (mesokurtic)')
+
+    # Skewness
+    if result['skewness'] > 0:
+        str_list.append(f'skewness = {result["skewness"]} (positive skew)')
+    elif result['skewness'] < 0:
+        str_list.append(f'skewness = {result["skewness"]} (negative skew)')
+    else:
+        str_list.append('skewness = 0 (no skew)')
+
+    # Add text (annotation) on the upper right corner
+    props = dict(boxstyle='round', facecolor='yellow', alpha=0.5)
+    textstr = '\n'.join(str_list)
+    ax.text(0.95, 0.95, textstr, transform=ax.transAxes, fontsize=10,
+            verticalalignment='top', horizontalalignment='right', bbox=props)
+
+    plt.show()
+
+    return result
+
+# Example usage
+data = np.random.randn(100) * 2 + 5  # Generating some random data for demonstration
+result = norm_fit_demo(data)
+print(result)
